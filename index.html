@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Numara Engelleyici</title>
+<style>
+  * { box-sizing: border-box; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { margin: 0; background: #f2f3f7; color: #1c1c1e; }
+  header { background: #e53935; color: #fff; padding: 18px 16px; font-size: 20px; font-weight: 600; }
+  main { max-width: 480px; margin: 0 auto; padding: 16px; }
+  .info { background: #fff3e0; border: 1px solid #ffb74d; border-radius: 10px; padding: 12px; font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
+  .add-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  input { flex: 1; padding: 14px; font-size: 16px; border: 1px solid #ccc; border-radius: 10px; }
+  button.add { background: #e53935; color: #fff; border: none; padding: 14px 20px; font-size: 16px; border-radius: 10px; cursor: pointer; }
+  h2 { font-size: 15px; color: #666; margin: 8px 0; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { background: #fff; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  li .num { font-size: 17px; font-weight: 500; }
+  li .del { background: none; border: none; color: #e53935; font-size: 20px; cursor: pointer; padding: 4px 8px; }
+  .empty { text-align: center; color: #999; padding: 24px; font-size: 14px; }
+</style>
+</head>
+<body>
+<header>📵 Numara Engelleyici</header>
+<main>
+  <div class="info">
+    Engellenen numara aradığında arayan kişiye operatörün <b>"aradığınız kişiye ulaşılamıyor"</b> anonsu çalınır, çağrı otomatik iptal olur. Telefonuna sadece cevapsız çağrı düşer. Engellemek için numara ekle, kaldırmak için çöp kutusuna bas.
+  </div>
+  <div class="add-row">
+    <input id="num" type="tel" placeholder="örn: 05321234567" inputmode="tel">
+    <button class="add" onclick="addNumber()">Engelle</button>
+  </div>
+  <h2>Engellenen Numaralar</h2>
+  <ul id="list"></ul>
+  <div class="empty" id="empty">Henüz engellenen numara yok</div>
+</main>
+<script>
+  function getList() {
+    try { return JSON.parse(localStorage.getItem('blockedNumbers')) || []; }
+    catch (e) { return []; }
+  }
+  function setList(arr) { localStorage.setItem('blockedNumbers', JSON.stringify(arr)); }
+
+  function normalize(n) {
+    n = n.replace(/[^0-9+]/g, '');
+    if (n.startsWith('+90')) n = '0' + n.slice(3);
+    return n;
+  }
+
+  function addNumber() {
+    const input = document.getElementById('num');
+    let num = input.value.trim();
+    if (normalize(num).length < 10) { alert('Geçerli bir numara gir (en az 10 hane).'); return; }
+    let list = getList();
+    if (!list.includes(num)) { list.push(num); setList(list); }
+    input.value = '';
+    render();
+  }
+
+  function removeNumber(i) {
+    let list = getList();
+    list.splice(i, 1);
+    setList(list);
+    render();
+  }
+
+  function render() {
+    const list = getList();
+    const ul = document.getElementById('list');
+    const empty = document.getElementById('empty');
+    ul.innerHTML = '';
+    empty.style.display = list.length ? 'none' : 'block';
+    list.forEach((n, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = '<span class="num">📵 ' + n + '</span><button class="del" onclick="removeNumber(' + i + ')" title="Engeli kaldır">✕</button>';
+      ul.appendChild(li);
+    });
+  }
+  render();
+</script>
+</body>
+</html>
